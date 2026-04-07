@@ -284,9 +284,15 @@ paths:
                     type: object
                     properties:
                       results:
-                        type: object
-                        additionalProperties:
-                          type: string
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            group_id:
+                              type: string
+                            status:
+                              type: string
+                              enum: [shared, duplicate]
                   meta:
                     $ref: "#/components/schemas/Meta"
         "400":

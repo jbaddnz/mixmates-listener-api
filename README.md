@@ -206,6 +206,19 @@ Share to groups.
 
 Max 20 groups per request. You must be a member of each group.
 
+**Response:**
+
+```json
+{
+  "data": {
+    "results": [
+      { "group_id": "g1", "status": "shared" },
+      { "group_id": "g2", "status": "duplicate" }
+    ]
+  }
+}
+```
+
 ---
 
 ### `GET /groups`
