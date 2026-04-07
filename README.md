@@ -1,6 +1,8 @@
-<img src="../../assets/mml-text.svg" alt="MixMat Ltd" width="120">
-
 # MixMates Listener API v1
+
+**[Interactive API Docs](https://jbaddnz.github.io/mixmates-listener-api/)** | **[Developer Guide](DEVELOPER_GUIDE.md)** | **[OpenAPI Spec](listener-v1-openapi.yaml)**
+
+Build your own Listener app for [MixMates](https://mixmat.es) — identify songs from audio, manage your listen queue, share discoveries with your groups.
 
 Base URL: `https://mixmat.es/api/v1/listener`
 
