@@ -1,8 +1,8 @@
 # MixMates Listener API v1
 
-**[Interactive API Docs](https://jbaddnz.github.io/mixmates-listener-api/)** | **[Developer Guide](DEVELOPER_GUIDE.md)** | **[OpenAPI Spec](listener-v1-openapi.yaml)**
+**[Interactive API Docs](https://jbaddnz.github.io/mixmates-listener-api/)** | **[Developer Guide](DEVELOPER_GUIDE.md)** | **[OpenAPI Spec](listener-v1-openapi.yaml)** | **[Android Reference App](https://github.com/jbaddnz/mixmates-listener-android)**
 
-Build your own Listener app for [MixMates](https://mixmat.es) — identify songs from audio, manage your listen queue, share discoveries with your groups.
+Build your own Listener app for [MixMates](https://mixmat.es) — identify songs from audio, manage your listen queue, share discoveries with your groups. See the [Android Listener](https://github.com/jbaddnz/mixmates-listener-android) for a working open source implementation.
 
 Base URL: `https://mixmat.es/api/v1/listener`
 
