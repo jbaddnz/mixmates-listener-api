@@ -141,6 +141,9 @@ paths:
                       source:
                         type: ["string", "null"]
                         enum: [recognition, search, null]
+                      history_id:
+                        type: ["string", "null"]
+                        description: History entry ID. Present for saved and duplicate, null otherwise. Use with POST /history/{id}/report.
                       track:
                         $ref: "#/components/schemas/Track"
                   meta:
