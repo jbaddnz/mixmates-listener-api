@@ -300,6 +300,48 @@ paths:
         "403":
           description: Not a member of target group
 
+  /history/{id}/report:
+    post:
+      operationId: reportHistoryItem
+      summary: Report wrong match
+      description: Report a recognition result as incorrect. Uses the same reporting system as the web app.
+      parameters:
+        - $ref: "#/components/parameters/HistoryId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: ["string", "null"]
+                  description: Optional free text reason (e.g. "wrong_match", "wrong_version")
+      responses:
+        "201":
+          description: Report submitted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      reported:
+                        type: boolean
+                  meta:
+                    $ref: "#/components/schemas/Meta"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Already reported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
   /groups:
     get:
       operationId: getGroups
@@ -444,13 +486,13 @@ paths:
     get:
       operationId: getMe
       summary: Token introspection
-      description: Verify your token and check quota. Accepts both Bearer and session auth.
+      description: Verify your token and get user info. Accepts both Bearer and session auth. The `rate_limit` field is always null - rate limiting is handled server-side and not exposed to clients.
       security:
         - BearerAuth: []
         - SessionAuth: []
       responses:
         "200":
-          description: User info and rate limit status
+          description: User info
           content:
             application/json:
               schema:
