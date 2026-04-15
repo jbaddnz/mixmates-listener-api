@@ -105,6 +105,7 @@ Submit audio for recognition.
   "data": {
     "status": "saved",
     "source": "recognition",
+    "history_id": "abc123",
     "track": {
       "title": "Midnight City",
       "artist": "M83",
@@ -120,6 +121,8 @@ Submit audio for recognition.
   }
 }
 ```
+
+`history_id` is present for `saved` and `duplicate` status, `null` otherwise. Use with `POST /history/:id/report` to report wrong matches.
 
 **Status values:**
 
@@ -221,6 +224,34 @@ Max 20 groups per request. You must be a member of each group.
 
 ---
 
+### `POST /history/:id/report`
+
+Report a wrong recognition result.
+
+**Body:**
+
+```json
+{
+  "reason": "wrong_match"
+}
+```
+
+`reason` is optional free text.
+
+**Response (201):**
+
+```json
+{
+  "data": {
+    "reported": true
+  }
+}
+```
+
+Returns `409` if already reported.
+
+---
+
 ### `GET /groups`
 
 Your groups (for share target selection). Excludes the Listen group.
@@ -295,7 +326,7 @@ Revoke your current token. All tokens issued before this point become invalid. *
 
 ### `GET /auth/me`
 
-Verify your token and check quota. Accepts both Bearer and session auth.
+Verify your token and get user info. Accepts both Bearer and session auth.
 
 ```json
 {
@@ -307,11 +338,7 @@ Verify your token and check quota. Accepts both Bearer and session auth.
       "listen_enabled": true,
       "preferred_platform": "tidal"
     },
-    "rate_limit": {
-      "limit": 20,
-      "remaining": 17,
-      "reset_at": 1709654400
-    }
+    "rate_limit": null
   }
 }
 ```
@@ -325,8 +352,9 @@ Verify your token and check quota. Accepts both Bearer and session auth.
 | `auth_insufficient_role` | 403 | Paid account required |
 | `auth_listen_disabled` | 403 | Listen not enabled in Settings |
 | `auth_token_revoked` | 401 | Token was revoked |
-| `rate_limit_user` | 429 | Per-user hourly limit exceeded |
+| `rate_limit_user` | 429 | Per-user limit exceeded |
 | `rate_limit_global` | 429 | Daily global limit exceeded |
+| `duplicate` | 409 | Already reported |
 | `invalid_content_type` | 400 | Request not multipart/form-data |
 | `missing_audio` | 400 | No audio file in request |
 | `audio_too_large` | 400 | Audio exceeds 5MB |
