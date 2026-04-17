@@ -33,6 +33,13 @@ curl -X POST \
   -F "audio=@recording.webm" \
   https://mixmat.es/api/v1/listener/recognize
 
+# Resolve a music URL to cross-platform links
+curl -X POST \
+  -H "Authorization: Bearer TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC"}' \
+  https://mixmat.es/api/v1/listener/resolve
+
 # List your listen queue
 curl -H "Authorization: Bearer TOKEN" \
   https://mixmat.es/api/v1/listener/history
@@ -82,6 +89,7 @@ X-RateLimit-Reset: 1709654400
 ```
 
 Recognition limits: 20/hr (paid), 100/hr (VIP), 200/day (global).
+Resolve limits: 60/hr (paid), 200/hr (VIP), 1000/day (global).
 `429` responses include `Retry-After`.
 
 ## Endpoints
@@ -134,6 +142,57 @@ Submit audio for recognition.
 | `no_links` | Identified but no streaming URLs found |
 
 `track` is `null` when status is `no_match`.
+
+---
+
+### `POST /resolve`
+
+Resolve a music URL to cross-platform links. Takes a Spotify, Tidal, or Apple Music track URL and returns the same track object shape as `/recognize`.
+
+**Body:**
+
+```json
+{
+  "url": "https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC",
+  "group_id": "abc123"
+}
+```
+
+`group_id` is optional — defaults to your listen group.
+
+**Response:**
+
+```json
+{
+  "data": {
+    "status": "saved",
+    "source": "link",
+    "history_id": "abc123",
+    "track": {
+      "title": "Midnight City",
+      "artist": "M83",
+      "thumbnail": "https://...",
+      "shortcode": "aBcDeF12",
+      "share_url": "https://mixmat.es/aBcDeF12",
+      "platforms": {
+        "spotify": "https://open.spotify.com/track/...",
+        "tidal": "https://tidal.com/browse/track/...",
+        "appleMusic": "https://music.apple.com/..."
+      }
+    }
+  }
+}
+```
+
+**Status values:**
+
+| Status | Meaning |
+|---|---|
+| `saved` | Track resolved and saved to group |
+| `duplicate` | Track already in target group |
+| `no_links` | Could not resolve cross-platform links |
+
+Only track URLs are accepted. Album, playlist, and artist URLs return `unsupported_url_type`. Rate limits: 60/hr (paid), 200/hr (VIP).
 
 ---
 
@@ -362,4 +421,9 @@ Verify your token and get user info. Accepts both Bearer and session auth.
 | `missing_field` | 400 | Required field missing |
 | `invalid_field` | 400 | Field value invalid |
 | `not_found` | 404 | Resource not found |
+| `invalid_url` | 400 | Not a valid URL |
+| `unsupported_platform` | 400 | URL not Spotify, Tidal, or Apple Music |
+| `unsupported_url_type` | 400 | Not a track URL (album, playlist, etc.) |
+| `invalid_group` | 400 | Not a member of the specified group |
 | `recognition_unavailable` | 502 | Recognition service down |
+| `resolve_failed` | 502 | URL conversion pipeline failed |
