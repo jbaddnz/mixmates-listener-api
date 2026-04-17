@@ -168,6 +168,75 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /resolve:
+    post:
+      operationId: resolveUrl
+      summary: Resolve a music URL
+      description: |
+        Takes a Spotify, Tidal, or Apple Music track URL and returns
+        cross-platform links. The track is saved to the specified group
+        (or your listen group by default).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url:
+                  type: string
+                  format: uri
+                  description: Spotify, Tidal, or Apple Music track URL
+                  example: "https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC"
+                group_id:
+                  type: ["string", "null"]
+                  description: Target group ID. Defaults to listen group if omitted.
+                  example: "abc123"
+      responses:
+        "200":
+          description: Track resolved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        enum: [saved, duplicate, no_links]
+                      source:
+                        type: string
+                        enum: [link]
+                      history_id:
+                        type: ["string", "null"]
+                        description: History entry ID. Present for saved and duplicate, null for no_links.
+                      track:
+                        $ref: "#/components/schemas/Track"
+                  meta:
+                    $ref: "#/components/schemas/Meta"
+          headers:
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "502":
+          description: Conversion pipeline failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /history:
     get:
       operationId: getHistory
