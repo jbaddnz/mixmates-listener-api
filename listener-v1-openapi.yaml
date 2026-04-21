@@ -503,6 +503,69 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+  /push/register:
+    post:
+      operationId: registerPush
+      summary: Register for push notifications
+      description: |
+        Register an APNs device token to receive push notifications for
+        group track adds and notes. Call on every app launch (tokens can
+        change). Upserts — same token re-registers without error.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [device_token]
+              properties:
+                device_token:
+                  type: string
+                  description: APNs device token (hex-encoded)
+                  example: "a1b2c3d4e5f6..."
+      responses:
+        "200":
+          description: Token registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      registered:
+                        type: boolean
+                  meta:
+                    $ref: "#/components/schemas/Meta"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    delete:
+      operationId: deregisterPush
+      summary: Deregister from push notifications
+      description: |
+        Remove all APNs device tokens for the authenticated user.
+        Call on sign-out.
+      responses:
+        "200":
+          description: Tokens removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      deregistered:
+                        type: boolean
+                  meta:
+                    $ref: "#/components/schemas/Meta"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
   /auth/token:
     post:
       operationId: createToken

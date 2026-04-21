@@ -362,6 +362,36 @@ Delete all saved recordings.
 
 ---
 
+### `POST /push/register`
+
+Register an APNs device token for push notifications. Call on every app launch (tokens can change). Notifications are sent for group track adds and notes.
+
+**Body:**
+
+```json
+{
+  "device_token": "a1b2c3d4e5f6..."
+}
+```
+
+**Response:**
+
+```json
+{
+  "data": {
+    "registered": true
+  }
+}
+```
+
+---
+
+### `DELETE /push/register`
+
+Remove all device tokens for the authenticated user. Call on sign-out.
+
+---
+
 ### `POST /auth/token`
 
 Generate a new Bearer token. **Session auth only** (from the web UI).
