@@ -4,17 +4,83 @@ A practical guide for developers building a MixMates Listener app. Read the [API
 
 ## Getting a Token
 
-Before your app can call the API, the user needs a Bearer token:
+There are two ways for a user to authenticate:
 
-1. Sign up at [mixmat.es](https://mixmat.es) via Spotify, Tidal, or Apple Music
+### Option 1: Native sign-in (recommended)
+
+Use the platform-native sign-in flow — Sign in with Apple (iOS) or Sign in with Google (Android). The user taps one button, authenticates with biometrics, and receives a Bearer token automatically.
+
+**iOS — Sign in with Apple:**
+
+`POST /api/v1/listener/auth/apple`
+
+```json
+{
+  "identity_token": "eyJ...",
+  "nonce": "random-string",
+  "user": { "name": "Jamie Baddeley", "email": "jamie@example.com" }
+}
+```
+
+The `user` object is only populated on first sign-in — Apple sends name/email once, then never again. Always send it when available. The `nonce` is required for replay protection — generate a random string, SHA256-hash it for the Apple request, send the raw string to the server.
+
+**Android — Sign in with Google:**
+
+`POST /api/v1/listener/auth/google`
+
+```json
+{
+  "id_token": "eyJ...",
+  "nonce": "random-string",
+  "name": "Jamie Baddeley"
+}
+```
+
+Use the web client ID (same as the MixMates web app) with Credential Manager. Set the nonce via `setNonce()`.
+
+**Response (both endpoints):**
+
+```json
+{
+  "data": {
+    "token": "encrypted-bearer-token",
+    "is_new_account": true,
+    "listen_enabled": false
+  }
+}
+```
+
+- `token` — Bearer token for all subsequent API calls. Store securely (Keychain on iOS, EncryptedSharedPreferences on Android)
+- `is_new_account` — true if a new MixMates account was created. Show welcome/onboarding
+- `listen_enabled` — true if the user has a paid account with Listen enabled. If false, the token is valid but recognition endpoints will return 403. Guide the user to upgrade at mixmat.es
+
+**Error responses:**
+
+| Code | Meaning |
+|---|---|
+| `missing_token` | No identity/ID token provided |
+| `missing_nonce` | No nonce provided |
+| `nonce_reused` | Nonce already used (replay attack or retry) |
+| `token_invalid` | Token signature verification failed |
+| `rate_limit` | Too many attempts (5/min per IP) |
+
+These endpoints are unauthenticated — no Bearer token is required (this IS the sign-in).
+
+### Option 2: Paste a token (fallback)
+
+For users who prefer it, or when native sign-in isn't available:
+
+1. Sign in at [mixmat.es](https://mixmat.es)
 2. Upgrade to a paid plan ($5/mo or above) — audio recognition is a paid feature
 3. Open **Settings** → scroll to **Listening** → toggle **Listen** on
 4. Open the **Listen** group (via the group selector) → click **Listen settings**
 5. Click **Listen Key** → copy the token
 
-Your app should provide a way to paste or scan this token. Store it securely on the device (Keychain on iOS, EncryptedSharedPreferences on Android).
+Your app should provide a way to paste this token as a secondary option below the native sign-in button.
 
-The token doesn't expire unless the user explicitly revokes it. Your app should handle `401` responses gracefully — prompt the user to generate a new token if theirs has been revoked.
+### Token lifecycle
+
+The token doesn't expire unless the user explicitly revokes it. Your app should handle `401` responses gracefully — prompt the user to sign in again (or generate a new token) if theirs has been revoked.
 
 ## Audio Recording
 
