@@ -15,7 +15,7 @@ Authorization: Bearer YOUR_TOKEN
 ```
 
 Generate a token in MixMates Settings or via `POST /auth/token`.
-Requires a paid MixMates account with Listen enabled.
+Requires a MixMates account with Listen enabled.
 
 ## Quick Start
 

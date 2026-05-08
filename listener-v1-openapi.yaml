@@ -35,16 +35,16 @@ info:
     1. Use Sign in with Apple (iOS) or Sign in with Google (Android) via
        `POST /auth/apple` or `POST /auth/google`
     2. The endpoint returns a Bearer token — store it securely
-    3. If `listen_enabled` is false, guide the user to upgrade at mixmat.es
+    3. The response includes `listen_enabled` indicating whether the
+       account has Listen access. Recognition endpoints return `403` if
+       Listen is not enabled on the account.
     4. Start building
 
     **For web or manual setup:**
 
-    1. Sign up at [mixmat.es](https://mixmat.es)
-    2. Upgrade to a paid plan (from $5/mo) to unlock audio recognition
-    3. Enable Listen in Settings
-    4. Generate a Listen key (Bearer token) in your Listen group settings
-    5. Start building
+    1. Have a MixMates account at [mixmat.es](https://mixmat.es) with Listen enabled
+    2. Generate a Listen key (Bearer token) in your Listen group settings
+    3. Start building
 
     ## Authentication
 
@@ -58,7 +58,7 @@ info:
 
     Obtain a token via native sign-in (`POST /auth/apple` or `POST /auth/google`),
     from MixMates Settings on the web, or via `POST /auth/token` (session auth).
-    Recognition and history endpoints require a paid MixMates account with Listen enabled.
+    Recognition and history endpoints require a MixMates account with Listen enabled.
 
     ## Rate Limits
 
@@ -631,7 +631,7 @@ paths:
                         description: True if a new MixMates account was created
                       listen_enabled:
                         type: boolean
-                        description: True if the account has Listen enabled (paid tier)
+                        description: True if the account has Listen enabled. False means recognition endpoints will return 403.
         "400":
           description: Missing or invalid parameters (missing_token, missing_nonce, nonce_reused)
         "401":
@@ -686,7 +686,7 @@ paths:
                         description: True if a new MixMates account was created
                       listen_enabled:
                         type: boolean
-                        description: True if the account has Listen enabled (paid tier)
+                        description: True if the account has Listen enabled. False means recognition endpoints will return 403.
         "400":
           description: Missing or invalid parameters (missing_token, missing_nonce, nonce_reused)
         "401":

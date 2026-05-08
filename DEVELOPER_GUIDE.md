@@ -52,7 +52,7 @@ Use the web client ID (same as the MixMates web app) with Credential Manager. Se
 
 - `token` — Bearer token for all subsequent API calls. Store securely (Keychain on iOS, EncryptedSharedPreferences on Android)
 - `is_new_account` — true if a new MixMates account was created. Show welcome/onboarding
-- `listen_enabled` — true if the user has a paid account with Listen enabled. If false, the token is valid but recognition endpoints will return 403. Guide the user to upgrade at mixmat.es
+- `listen_enabled` — true if the account has Listen enabled and an eligible role. If false, the Bearer token is issued but every authenticated endpoint will return `403` (`auth_insufficient_role` or `auth_listen_disabled` depending on which gate fails). The unauthenticated endpoints (`/health`, `/auth/apple`, `/auth/google`) remain available.
 
 **Error responses:**
 
@@ -70,11 +70,10 @@ These endpoints are unauthenticated — no Bearer token is required (this IS the
 
 For users who prefer it, or when native sign-in isn't available:
 
-1. Sign in at [mixmat.es](https://mixmat.es)
-2. Upgrade to a paid plan ($5/mo or above) — audio recognition is a paid feature
-3. Open **Settings** → scroll to **Listening** → toggle **Listen** on
-4. Open the **Listen** group (via the group selector) → click **Listen settings**
-5. Click **Listen Key** → copy the token
+1. Sign in at [mixmat.es](https://mixmat.es) with a Listen-enabled account
+2. Open **Settings** → scroll to **Listening** → toggle **Listen** on
+3. Open the **Listen** group (via the group selector) → click **Listen settings**
+4. Click **Listen Key** → copy the token
 
 Your app should provide a way to paste this token as a secondary option below the native sign-in button.
 
