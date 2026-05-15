@@ -241,6 +241,16 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: |
+            Target group is in mastering mode and the caller is not the creator
+            or a co-creator. Error code `group_locked`. The group's curator has
+            frozen the tracklist; reactions and notes remain open via the web
+            app, but new tracks can only be added by the curator team.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "429":
           $ref: "#/components/responses/RateLimited"
         "502":
@@ -383,7 +393,15 @@ paths:
         "400":
           $ref: "#/components/responses/BadRequest"
         "403":
-          description: Not a member of target group
+          description: |
+            Either the caller is not a member of one of the target groups
+            (code `not_found`) or one of the target groups is in mastering
+            mode and the caller is not the creator / a co-creator
+            (code `group_locked`).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /history/{id}/report:
     post:

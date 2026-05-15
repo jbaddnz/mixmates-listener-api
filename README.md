@@ -455,5 +455,6 @@ Verify your token and get user info. Accepts both Bearer and session auth.
 | `unsupported_platform` | 400 | URL not Spotify, Tidal, or Apple Music |
 | `unsupported_url_type` | 400 | Not a track URL (album, playlist, etc.) |
 | `invalid_group` | 400 | Not a member of the specified group |
+| `group_locked` | 403 | Target group is in mastering mode — only the creator + co-creators can add tracks. Reactions and notes remain open via the web app. |
 | `recognition_unavailable` | 502 | Recognition service down |
 | `resolve_failed` | 502 | URL conversion pipeline failed |
