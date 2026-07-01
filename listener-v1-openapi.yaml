@@ -35,15 +35,15 @@ info:
     1. Use Sign in with Apple (iOS) or Sign in with Google (Android) via
        `POST /auth/apple` or `POST /auth/google`
     2. The endpoint returns a Bearer token — store it securely
-    3. The response includes `listen_enabled` indicating whether the
-       account has Listen access. Recognition endpoints return `403` if
-       Listen is not enabled on the account.
+    3. The response includes `listen_enabled`. Listen is free for every
+       account, so this is normally `true`; it is `false` only if the user
+       explicitly turned Listen off (recognition then returns `403`).
     4. Start building
 
     **For web or manual setup:**
 
-    1. Have a MixMates account at [mixmat.es](https://mixmat.es) with Listen enabled
-    2. Generate a Listen key (Bearer token) in your Listen group settings
+    1. Have a free MixMates account at [mixmat.es](https://mixmat.es)
+    2. Generate a Bearer token in Settings
     3. Start building
 
     ## Authentication
@@ -58,7 +58,8 @@ info:
 
     Obtain a token via native sign-in (`POST /auth/apple` or `POST /auth/google`),
     from MixMates Settings on the web, or via `POST /auth/token` (session auth).
-    Recognition and history endpoints require a MixMates account with Listen enabled.
+    Listen is free for any signed-in MixMates account; recognition and history
+    endpoints return `403` only if the user turned Listen off.
 
     ## Rate Limits
 
@@ -70,8 +71,9 @@ info:
     X-RateLimit-Reset: 1709654400
     ```
 
-    Recognition is rate limited per-user (20/hr paid, 100/hr VIP) and globally (200/day).
-    `429` responses include a `Retry-After` header.
+    Recognition is rate limited per-user (free 12/hr + 40/day, paid 20/hr,
+    VIP 100/hr) and by a daily global cap. `429` responses include a
+    `Retry-After` header.
 
     ## Response Envelope
 
@@ -649,7 +651,7 @@ paths:
                         description: True if a new MixMates account was created
                       listen_enabled:
                         type: boolean
-                        description: True if the account has Listen enabled. False means recognition endpoints will return 403.
+                        description: Whether Listen is on. Free for every account, so normally true; false only if the user turned Listen off (recognition then returns 403).
         "400":
           description: Missing or invalid parameters (missing_token, missing_nonce, nonce_reused)
         "401":
@@ -704,7 +706,7 @@ paths:
                         description: True if a new MixMates account was created
                       listen_enabled:
                         type: boolean
-                        description: True if the account has Listen enabled. False means recognition endpoints will return 403.
+                        description: Whether Listen is on. Free for every account, so normally true; false only if the user turned Listen off (recognition then returns 403).
         "400":
           description: Missing or invalid parameters (missing_token, missing_nonce, nonce_reused)
         "401":
@@ -763,11 +765,41 @@ paths:
                   meta:
                     $ref: "#/components/schemas/Meta"
 
+  /account:
+    delete:
+      operationId: deleteAccount
+      summary: Delete account
+      description: |
+        Permanently delete the authenticated account (App Store 5.1.1(v) in-app
+        deletion). Reattributes the user's group contributions to a "Former
+        member" placeholder — shared tracks stay in the groups — then deletes
+        private history, reactions, recognition logs, and saved recordings, and
+        cancels any active subscription. The user is removed, so the Bearer
+        token stops working immediately. Always reachable, regardless of the
+        Listen preference. Bearer auth only.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Account deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      deleted:
+                        type: boolean
+                  meta:
+                    $ref: "#/components/schemas/Meta"
+
   /auth/me:
     get:
       operationId: getMe
       summary: Token introspection
-      description: Verify your token and get user info. Accepts both Bearer and session auth. The `rate_limit` field is always null - rate limiting is handled server-side and not exposed to clients.
+      description: Verify your token and get user info. Accepts both Bearer and session auth. The `rate_limit` field is null unless a server-side flag is enabled; clients must not render it as a quota meter.
       security:
         - BearerAuth: []
         - SessionAuth: []
