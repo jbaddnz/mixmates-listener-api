@@ -45,14 +45,14 @@ Use the web client ID (same as the MixMates web app) with Credential Manager. Se
   "data": {
     "token": "encrypted-bearer-token",
     "is_new_account": true,
-    "listen_enabled": false
+    "listen_enabled": true
   }
 }
 ```
 
 - `token` — Bearer token for all subsequent API calls. Store securely (Keychain on iOS, EncryptedSharedPreferences on Android)
 - `is_new_account` — true if a new MixMates account was created. Show welcome/onboarding
-- `listen_enabled` — true if the account has Listen enabled and an eligible role. If false, the Bearer token is issued but every authenticated endpoint will return `403` (`auth_insufficient_role` or `auth_listen_disabled` depending on which gate fails). The unauthenticated endpoints (`/health`, `/auth/apple`, `/auth/google`) remain available.
+- `listen_enabled` — Listen is free for every account, so this is normally `true`. It is `false` only if the user explicitly turned Listen off, in which case authenticated recognition endpoints return `403` (`auth_listen_disabled`). The unauthenticated endpoints (`/health`, `/auth/apple`, `/auth/google`) remain available.
 
 **Error responses:**
 
@@ -66,16 +66,9 @@ Use the web client ID (same as the MixMates web app) with Credential Manager. Se
 
 These endpoints are unauthenticated — no Bearer token is required (this IS the sign-in).
 
-### Option 2: Paste a token (fallback)
+### Option 2: Manual token (non-app / programmatic use)
 
-For users who prefer it, or when native sign-in isn't available:
-
-1. Sign in at [mixmat.es](https://mixmat.es) with a Listen-enabled account
-2. Open **Settings** → scroll to **Listening** → toggle **Listen** on
-3. Open the **Listen** group (via the group selector) → click **Listen settings**
-4. Click **Listen Key** → copy the token
-
-Your app should provide a way to paste this token as a secondary option below the native sign-in button.
+For scripts, server integrations, or other non-app consumers, generate a Bearer token in MixMates Settings and send it as `Authorization: Bearer <token>`. Native apps should use Sign in with Apple / Google (Option 1) and must not add a token-paste field.
 
 ### Token lifecycle
 
@@ -199,9 +192,10 @@ The recognition service is temporarily unavailable. Show an error and let the us
 Check the `X-RateLimit-Remaining` header after each `/recognize` call. When it hits 0, show the user how long until they can try again (from `X-RateLimit-Reset`).
 
 Limits:
-- **Paid users:** 20 recognitions per hour
-- **VIP users:** 100 per hour
-- **Global:** 200 per day across all users
+- **Free:** 12 recognitions per hour (and 40 per day)
+- **Paid:** 20 per hour
+- **VIP:** 100 per hour
+- **Global:** a daily cap across all users
 
 Your app should:
 1. Show remaining recognitions somewhere accessible (not in-your-face, but findable)

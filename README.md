@@ -14,8 +14,8 @@ All endpoints require a Bearer token (except `/health`):
 Authorization: Bearer YOUR_TOKEN
 ```
 
-Generate a token in MixMates Settings or via `POST /auth/token`.
-Requires a MixMates account with Listen enabled.
+Generate a token via native sign-in (`POST /auth/apple` / `POST /auth/google`), in MixMates Settings, or via `POST /auth/token`.
+Listen is free for any signed-in MixMates account.
 
 ## Quick Start
 
@@ -88,8 +88,8 @@ X-RateLimit-Remaining: 17
 X-RateLimit-Reset: 1709654400
 ```
 
-Recognition limits: 20/hr (paid), 100/hr (VIP), 200/day (global).
-Resolve limits: 60/hr (paid), 200/hr (VIP), 1000/day (global).
+Recognition limits: free 12/hr (+40/day), paid 20/hr, VIP 100/hr, plus a daily global cap.
+Resolve limits: 60/hr, 200/hr (VIP), 1000/day (global).
 `429` responses include `Retry-After`.
 
 ## Endpoints
@@ -192,7 +192,7 @@ Resolve a music URL to cross-platform links. Takes a Spotify, Tidal, or Apple Mu
 | `duplicate` | Track already in target group |
 | `no_links` | Could not resolve cross-platform links |
 
-Only track URLs are accepted. Album, playlist, and artist URLs return `unsupported_url_type`. Rate limits: 60/hr (paid), 200/hr (VIP).
+Only track URLs are accepted. Album, playlist, and artist URLs return `unsupported_url_type`. Rate limits: 60/hr, 200/hr (VIP).
 
 ---
 
@@ -438,8 +438,7 @@ Verify your token and get user info. Accepts both Bearer and session auth.
 |---|---|---|
 | `auth_required` | 401 | No token or token invalid |
 | `auth_invalid_token` | 401 | Token could not be decrypted |
-| `auth_insufficient_role` | 403 | Paid account required |
-| `auth_listen_disabled` | 403 | Listen not enabled in Settings |
+| `auth_listen_disabled` | 403 | Listen is turned off for this account |
 | `auth_token_revoked` | 401 | Token was revoked |
 | `rate_limit_user` | 429 | Per-user limit exceeded |
 | `rate_limit_global` | 429 | Daily global limit exceeded |
