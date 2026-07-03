@@ -71,9 +71,9 @@ info:
     X-RateLimit-Reset: 1709654400
     ```
 
-    Recognition is rate limited per-user (free 12/hr + 40/day, paid 20/hr,
-    VIP 100/hr) and by a daily global cap. `429` responses include a
-    `Retry-After` header.
+    Recognition is rate limited per-user (20/hr + 40/day) and by a daily
+    global cap. Limits are identical for every account — this API is
+    tier-blind by design. `429` responses include a `Retry-After` header.
 
     ## Response Envelope
 
@@ -823,7 +823,13 @@ paths:
                             type: string
                           role:
                             type: string
-                            enum: [free, paid, paid_plus, vip, admin]
+                            enum: [listener]
+                            description: >-
+                              Always "listener". This API is tier-blind by
+                              design — account plans exist only for the
+                              separate MixMates web product and are not
+                              expressed here. The field is retained for
+                              client compatibility.
                           listen_enabled:
                             type: boolean
                           preferred_platform:
