@@ -912,6 +912,16 @@ components:
           example: https://mixmat.es/aBcDeF12
         platforms:
           $ref: "#/components/schemas/Platforms"
+        bpm:
+          type: ["number", "null"]
+          description: "Beats per minute. null until async metadata enrichment lands (typically seconds to minutes after a track first enters the system); treat as progressively available on refetch. Display is free."
+        musical_key:
+          type: ["string", "null"]
+          description: 'Musical key in raw form, e.g. "C", "CSharp", "Eb". null until enriched.'
+        key_scale:
+          type: ["string", "null"]
+          enum: [MAJOR, MINOR, null]
+          description: "Key scale. null until enriched."
 
     Platforms:
       type: object
@@ -943,6 +953,16 @@ components:
         created_at:
           type: string
           format: date-time
+        bpm:
+          type: ["number", "null"]
+          description: "Beats per minute. null until async metadata enrichment lands; treat as progressively available on refetch. Display is free."
+        musical_key:
+          type: ["string", "null"]
+          description: 'Musical key in raw form, e.g. "C", "CSharp", "Eb". null until enriched.'
+        key_scale:
+          type: ["string", "null"]
+          enum: [MAJOR, MINOR, null]
+          description: "Key scale. null until enriched."
 
     HistoryItemDetail:
       allOf:
