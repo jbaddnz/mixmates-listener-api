@@ -124,7 +124,10 @@ Submit audio for recognition.
         "spotify": "https://open.spotify.com/track/...",
         "tidal": "https://tidal.com/browse/track/...",
         "appleMusic": "https://music.apple.com/..."
-      }
+      },
+      "bpm": 105,
+      "musical_key": "FSharp",
+      "key_scale": "MINOR"
     }
   }
 }
@@ -178,7 +181,10 @@ Resolve a music URL to cross-platform links. Takes a Spotify, Tidal, or Apple Mu
         "spotify": "https://open.spotify.com/track/...",
         "tidal": "https://tidal.com/browse/track/...",
         "appleMusic": "https://music.apple.com/..."
-      }
+      },
+      "bpm": 105,
+      "musical_key": "FSharp",
+      "key_scale": "MINOR"
     }
   }
 }
@@ -216,7 +222,10 @@ Paginated listen queue.
         "shortcode": "aBcDeF12",
         "share_url": "https://mixmat.es/aBcDeF12",
         "platforms": { ... },
-        "created_at": "2026-04-07T10:00:00.000Z"
+        "created_at": "2026-04-07T10:00:00.000Z",
+        "bpm": 105,
+        "musical_key": "FSharp",
+        "key_scale": "MINOR"
       }
     ],
     "cursor": "1709654400000",
