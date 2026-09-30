@@ -72,8 +72,8 @@ info:
     ```
 
     Recognition is rate limited per-user (20/hr + 40/day) and by a daily
-    global cap. Limits are identical for every account — this API is
-    tier-blind by design. `429` responses include a `Retry-After` header.
+    global cap. These limits are identical for every account, by design.
+    `429` responses include a `Retry-After` header.
 
     ## Response Envelope
 
