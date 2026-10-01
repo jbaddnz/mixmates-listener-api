@@ -174,6 +174,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "429":
           $ref: "#/components/responses/RateLimited"
         "502":
@@ -245,10 +247,16 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "403":
           description: |
-            Target group is in mastering mode and the caller is not the creator
-            or a co-creator. Error code `group_locked`. The group's curator has
-            frozen the tracklist; reactions and notes remain open via the web
-            app, but new tracks can only be added by the curator team.
+            One of:
+
+            - `group_locked`: the target group is in mastering mode and the
+              caller is not the creator or a co-creator. The group's curator has
+              frozen the tracklist; reactions and notes remain open via the web
+              app, but new tracks can only be added by the curator team.
+            - `name_required`: a `group_id` was given and the account has no
+              display name of its own yet. Set one with `PATCH /auth/me`, then
+              retry.
+            - `auth_listen_disabled`: Listen is turned off for this account.
           content:
             application/json:
               schema:
@@ -304,6 +312,8 @@ paths:
                     $ref: "#/components/schemas/Meta"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
 
   /history/{id}:
     get:
@@ -323,6 +333,8 @@ paths:
                     $ref: "#/components/schemas/HistoryItemDetail"
                   meta:
                     $ref: "#/components/schemas/Meta"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
     delete:
@@ -345,6 +357,8 @@ paths:
                         type: boolean
                   meta:
                     $ref: "#/components/schemas/Meta"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
 
@@ -396,10 +410,14 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "403":
           description: |
-            Either the caller is not a member of one of the target groups
-            (code `not_found`) or one of the target groups is in mastering
-            mode and the caller is not the creator / a co-creator
-            (code `group_locked`).
+            Refuses the whole request; nothing is shared. One of:
+
+            - `not_found`: the caller is not a member of one of the target groups.
+            - `name_required`: the account has no display name of its own yet.
+              Set one with `PATCH /auth/me`, then retry.
+            - `group_locked`: one of the target groups is in mastering mode and
+              the caller is not the creator or a co-creator.
+            - `auth_listen_disabled`: Listen is turned off for this account.
           content:
             application/json:
               schema:
@@ -446,14 +464,16 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "400":
           $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
 
   /groups:
     get:
       operationId: getGroups
       summary: List your groups
       description: |
-        Returns your groups for share target selection.
-        Excludes the Listen group. Read-only — group CRUD is in the web app.
+        Returns your groups for share target selection, and whether this
+        account may start a group. Excludes the Listen group.
       responses:
         "200":
           description: Group list
@@ -465,12 +485,86 @@ paths:
                   data:
                     type: object
                     properties:
+                      can_create:
+                        type: boolean
+                        description: |
+                          True while this account owns no group. Show a way to
+                          start one only when this is true in a fresh response.
+                          Treat a missing field as false.
                       items:
                         type: array
                         items:
                           $ref: "#/components/schemas/Group"
                   meta:
                     $ref: "#/components/schemas/Meta"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      operationId: createGroup
+      summary: Start a group
+      description: |
+        Creates a group with the caller as its creator and first member, and
+        returns it with its invite link. Available while `can_create` is true.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  description: 1 to 100 characters after trimming.
+                description:
+                  type: string
+                  description: Up to 200 characters.
+      responses:
+        "201":
+          description: Group created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Group"
+                  meta:
+                    $ref: "#/components/schemas/Meta"
+        "400":
+          description: |
+            `missing_field` when the name is absent or empty; `invalid_field`
+            when the name or description is too long.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: |
+            Refuses the whole request; nothing is created. One of:
+
+            - `already_has_group`: this account already owns a group.
+            - `name_required`: the account has no display name of its own yet.
+              Set one with `PATCH /auth/me`, then retry.
+            - `auth_listen_disabled`: Listen is turned off for this account.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: |
+            `name_taken`: another group already has this name (compared without
+            regard to case or spacing). Choose a different name.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          $ref: "#/components/responses/RateLimited"
 
   /recordings:
     get:
@@ -494,6 +588,8 @@ paths:
                           $ref: "#/components/schemas/Recording"
                   meta:
                     $ref: "#/components/schemas/Meta"
+        "403":
+          $ref: "#/components/responses/Forbidden"
     delete:
       operationId: deleteRecordings
       summary: Delete all recordings
@@ -512,6 +608,8 @@ paths:
                         type: integer
                   meta:
                     $ref: "#/components/schemas/Meta"
+        "403":
+          $ref: "#/components/responses/Forbidden"
 
   /recordings/{recording_id}:
     get:
@@ -533,6 +631,8 @@ paths:
               schema:
                 type: string
                 format: binary
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
 
@@ -575,6 +675,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
     delete:
       operationId: deregisterPush
       summary: Deregister from push notifications
@@ -598,6 +700,8 @@ paths:
                     $ref: "#/components/schemas/Meta"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
 
   /auth/apple:
     post:
@@ -741,6 +845,8 @@ paths:
                         format: date-time
                   meta:
                     $ref: "#/components/schemas/Meta"
+        "403":
+          $ref: "#/components/responses/Forbidden"
     delete:
       operationId: revokeToken
       summary: Revoke current token
@@ -764,6 +870,8 @@ paths:
                         type: boolean
                   meta:
                     $ref: "#/components/schemas/Meta"
+        "403":
+          $ref: "#/components/responses/Forbidden"
 
   /account:
     delete:
@@ -847,6 +955,57 @@ paths:
                             description: Unix timestamp
                   meta:
                     $ref: "#/components/schemas/Meta"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    patch:
+      operationId: updateMe
+      summary: Set your display name
+      description: |
+        Sets the name other members see. Clears `name_required`. A nickname is
+        fine. Bearer auth only.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [display_name]
+              properties:
+                display_name:
+                  type: string
+                  description: 1 to 100 characters after trimming.
+      responses:
+        "200":
+          description: |
+            The updated user, in the same shape `GET /auth/me` returns.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        type: object
+                  meta:
+                    $ref: "#/components/schemas/Meta"
+        "400":
+          description: |
+            `invalid_field` when the name is empty or too long;
+            `private_relay_name` when it is an Apple private relay address.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimited"
 
 components:
   securitySchemes:
@@ -988,6 +1147,13 @@ components:
           type: string
         description:
           type: ["string", "null"]
+        invite_url:
+          type: ["string", "null"]
+          format: uri
+          description: |
+            The link that admits a friend to this group, for the user to send.
+            Static per group. Null on the demo group. Treat a missing field as
+            null.
 
     Recording:
       type: object
@@ -1031,6 +1197,14 @@ components:
             $ref: "#/components/schemas/ErrorResponse"
     Unauthorized:
       description: Authentication required or invalid
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: |
+        `auth_listen_disabled`: Listen is turned off for this account. Every
+        bearer route can return it except `DELETE /account`.
       content:
         application/json:
           schema:
