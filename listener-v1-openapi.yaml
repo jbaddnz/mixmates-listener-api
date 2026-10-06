@@ -1152,8 +1152,7 @@ components:
           format: uri
           description: |
             The link that admits a friend to this group, for the user to send.
-            Static per group. Null on the demo group. Treat a missing field as
-            null.
+            Static per group. Treat a missing or null field as no link.
 
     Recording:
       type: object
